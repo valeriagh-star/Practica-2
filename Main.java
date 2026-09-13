@@ -19,12 +19,13 @@ public class Main {
             System.out.println("       MENÚ ÁRBOL B (ORDEN m = 4)            ");
             System.out.println("=============================================");
             System.out.println("1. Insertar llave(s)");
-            System.out.println("2. Buscar llave");
+            System.out.println("2. Buscar llave(s)");
             System.out.println("3. Eliminar llave(s)");
-            System.out.println("4. Mostrar árbol actual (Visual)");
-            System.out.println("5. Cargar la secuencia de prueba oficial (Guía)");
-            System.out.println("6. Salir");
-            System.out.print("Seleccione una opción (1-6): ");
+            System.out.println("4. Mostrar árbol actual");
+            System.out.println("5. Imprimir árbol por niveles");
+            System.out.println("6. Crear un nuevo árbol");
+            System.out.println("7. Salir");
+            System.out.print("Seleccione una opción (1-7): ");
 
             String entradaOpcion = escaner.nextLine().trim();
 
@@ -32,7 +33,7 @@ public class Main {
             try {
                 opcion = Integer.parseInt(entradaOpcion);
             } catch (NumberFormatException e) {
-                System.out.println("\n[ERROR]: Opción no válida. Por favor, ingrese únicamente un número entre 1 y 6.");
+                System.out.println("\n[ERROR]: Opción inválida. Por favor, ingrese un número entre 1 y 7.");
                 continue;
             }
 
@@ -53,42 +54,24 @@ public class Main {
                     break;
                 case 5:
                     System.out.println("\n---------------------------------------------");
-                    System.out.println(">>> EJECUTANDO SECUENCIA COMPLETA DE LA GUÍA (Puntos 5.1 y 5.3)...");
-                    arbol = new ArbolB();
-                    int[] llavesPrueba = {20, 40, 10, 30, 50, 60, 70, 5, 15, 25, 35, 45};
-                    
-                    System.out.println("\n1. Insertando llaves: 20, 40, 10, 30, 50, 60, 70, 5, 15, 25, 35, 45...");
-                    for (int k : llavesPrueba) {
-                        arbol.insertar(k);
-                    }
-
-                    System.out.println("\n--- ESTADO DEL ÁRBOL TRAS INSERCIONES COMPLETAS ---");
-                    arbol.imprimirArbol();
-
-                    System.out.println("\n2. Búsquedas de verificación:");
-                    System.out.println("   buscar(35) -> " + (arbol.buscar(35) ? "FOUND" : "NOT_FOUND"));
-                    System.out.println("   buscar(99) -> " + (arbol.buscar(99) ? "FOUND" : "NOT_FOUND"));
-
-                    System.out.println("\n3. Eliminaciones obligatorias (25, 10, 70, 5)...");
-                    int[] llavesEliminar = {25, 10, 70, 5};
-                    for (int k : llavesEliminar) {
-                        System.out.println("\n>>> ELIMINANDO " + k + "...");
-                        arbol.eliminar(k);
-                    }
-
-                    System.out.println("\n--- ESTADO FINAL DEL ÁRBOL TRAS ELIMINACIONES ---");
-                    arbol.imprimirArbol();
-
-                    System.out.println("\n4. Búsquedas finales de verificación:");
-                    System.out.println("   buscar(25) -> " + (arbol.buscar(25) ? "FOUND" : "NOT_FOUND"));
-                    System.out.println("   buscar(35) -> " + (arbol.buscar(35) ? "FOUND" : "NOT_FOUND"));
+                    System.out.println(">>> RECORRIDO POR NIVELES:");
+                    arbol.imprimirPorNiveles();
                     break;
                 case 6:
+                    System.out.println("\n=============================================");
+                    System.out.println("       REINICIANDO: CREANDO NUEVO ÁRBOL      ");
+                    System.out.println("=============================================");
+                    arbol = new ArbolB();
+                    System.out.println("Nuevo árbol vacío creado:");
+                    arbol.imprimirArbol();
+                    solicitarInsercionInicial(escaner, arbol);
+                    break;
+                case 7:
                     System.out.println("\nSaliendo del programa...");
                     escaner.close();
                     return;
                 default:
-                    System.out.println("\n[ERROR]: Opción fuera de rango. Seleccione un número entre 1 y 6.");
+                    System.out.println("\n[ERROR]: Opción fuera de rango. Seleccione un número entre 1 y 7.");
             }
         }
     }
@@ -135,27 +118,35 @@ public class Main {
                     arbol.imprimirArbol();
                 }
             } catch (NumberFormatException e) {
-                System.out.println("\n[ERROR IGNORADO]: '" + parte + "' no es un número entero válido. Se omitió esta entrada.");
+                System.out.println("\n[ERROR]: '" + parte + "' no es un número entero válido. Se omitió esta entrada.");
             }
         }
     }
 
     private static void procesarBusqueda(Scanner escaner, ArbolB arbol) {
-        System.out.print("\nIngrese la llave a buscar: ");
-        String entrada = escaner.nextLine().trim();
+        System.out.print("\nIngrese la(s) llave(s) a buscar (separadas por espacio): ");
+        String linea = escaner.nextLine().trim();
 
-        try {
-            int valorBuscar = Integer.parseInt(entrada);
-            System.out.println("\n---------------------------------------------");
-            System.out.println(">>> OPERACIÓN: BUSCAR (" + valorBuscar + ")");
-            boolean encontrado = arbol.buscar(valorBuscar);
-            if (encontrado) {
-                System.out.println("Resultado: FOUND (La llave " + valorBuscar + " existe en el árbol).");
-            } else {
-                System.out.println("Resultado: NOT_FOUND (La llave " + valorBuscar + " NO existe en el árbol).");
+        if (linea.isEmpty()) {
+            System.out.println("[AVISO]: No ingresó ningún valor.");
+            return;
+        }
+
+        String[] partes = linea.split("\\s+");
+        for (String parte : partes) {
+            try {
+                int valorBuscar = Integer.parseInt(parte);
+                System.out.println("\n---------------------------------------------");
+                System.out.println(">>> OPERACIÓN: BUSCAR (" + valorBuscar + ")");
+                boolean encontrado = arbol.buscar(valorBuscar);
+                if (encontrado) {
+                    System.out.println("Resultado: FOUND (La llave " + valorBuscar + " SÍ existe en el árbol).");
+                } else {
+                    System.out.println("Resultado: NOT_FOUND (La llave " + valorBuscar + " NO existe en el árbol).");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("\n[ERROR]: '" + parte + "' no es un número entero válido. Se omitió esta entrada.");
             }
-        } catch (NumberFormatException e) {
-            System.out.println("\n[ERROR]: '" + entrada + "' no es un número válido. Operación cancelada.");
         }
     }
 
@@ -184,7 +175,7 @@ public class Main {
                     arbol.imprimirArbol();
                 }
             } catch (NumberFormatException e) {
-                System.out.println("\n[ERROR IGNORADO]: '" + parte + "' no es un número entero válido. Se omitió esta entrada.");
+                System.out.println("\n[ERROR]: '" + parte + "' no es un número entero válido. Se omitió esta entrada.");
             }
         }
     }
