@@ -1,3 +1,6 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class ArbolB {
     private NodoArbolB raiz;
     private final int M = 4;
@@ -288,5 +291,44 @@ public class ArbolB {
 
         System.out.println("   Estado del árbol tras fusión:");
         imprimirArbol();
+    }
+
+    // =========================================================================
+    // IMPRESIÓN POR NIVELES
+    // =========================================================================
+    public void imprimirPorNiveles() {
+        if (raiz == null || raiz.llaves.isEmpty()) {
+            System.out.println("   (Árbol vacío)");
+            return;
+        }
+
+        Queue<NodoArbolB> cola = new LinkedList<>();
+        cola.add(raiz);
+        int nivel = 0;
+
+        while (!cola.isEmpty()) {
+            int nodosEnNivel = cola.size();
+            StringBuilder sb = new StringBuilder();
+            sb.append("   Nivel ").append(nivel).append(": ");
+
+            for (int i = 0; i < nodosEnNivel; i++) {
+                NodoArbolB nodo = cola.poll();
+                
+                sb.append("[");
+                for (int j = 0; j < nodo.llaves.size(); j++) {
+                    sb.append(nodo.llaves.get(j));
+                    if (j < nodo.llaves.size() - 1) sb.append(" | ");
+                }
+                sb.append("] ");
+
+                if (!nodo.esHoja) {
+                    for (NodoArbolB hijo : nodo.hijos) {
+                        if (hijo != null) cola.add(hijo);
+                    }
+                }
+            }
+            System.out.println(sb.toString());
+            nivel++;
+        }
     }
 }
