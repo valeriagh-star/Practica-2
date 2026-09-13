@@ -1,4 +1,6 @@
+import java.util.ArrayList;	
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class ArbolB {
@@ -14,7 +16,7 @@ public class ArbolB {
     public NodoArbolB obtenerRaiz() {
         return raiz;
     }
-
+    
     // =========================================================================
     // BÚSQUEDA
     // =========================================================================
@@ -46,7 +48,7 @@ public class ArbolB {
     // =========================================================================
     public boolean insertar(int llave) {
         if (buscar(llave)) {
-            System.out.println("-> La llave " + llave + " ya existe en el árbol. No se admiten duplicados.");
+            System.out.println("La llave " + llave + " ya existe en el árbol. No se admiten duplicados.");
             return false;
         }
 
@@ -137,7 +139,7 @@ public class ArbolB {
     // =========================================================================
     public boolean eliminar(int llave) {
         if (!buscar(llave)) {
-            System.out.println("-> La llave " + llave + " no existe en el árbol.");
+            System.out.println("La llave " + llave + " no existe en el árbol.");
             return false;
         }
 
@@ -298,7 +300,7 @@ public class ArbolB {
     // =========================================================================
     public void imprimirPorNiveles() {
         if (raiz == null || raiz.llaves.isEmpty()) {
-            System.out.println("   (Árbol vacío)");
+            System.out.println("[]");
             return;
         }
 
@@ -317,7 +319,9 @@ public class ArbolB {
                 sb.append("[");
                 for (int j = 0; j < nodo.llaves.size(); j++) {
                     sb.append(nodo.llaves.get(j));
-                    if (j < nodo.llaves.size() - 1) sb.append(" | ");
+                    if (j < nodo.llaves.size() - 1) {
+                        sb.append(" | ");
+                    }
                 }
                 sb.append("] ");
 
@@ -329,6 +333,152 @@ public class ArbolB {
             }
             System.out.println(sb.toString());
             nivel++;
+        }
+    }
+
+    // =========================================================================
+    // IMPRESIÓN VISUAL TIPO ÁRBOL (CONECTORES / | \)
+    // =========================================================================
+    private static class NodoGrafico {
+    	NodoArbolB nodo;
+        int x;
+        int y;
+        String texto;
+        List<NodoGrafico> hijos = new ArrayList<>();
+
+        NodoGrafico(NodoArbolB nodo, int y) {
+            this.nodo = nodo;
+            this.y = y;
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < nodo.llaves.size(); i++) {
+                sb.append(nodo.llaves.get(i));
+                if (i < nodo.llaves.size() - 1) {
+                    sb.append(" | ");
+                }
+            }
+            sb.append("]");
+            this.texto = sb.toString();
+        }
+    }
+
+    public void imprimirArbol() {
+        if (raiz == null || raiz.llaves.isEmpty()) {
+            System.out.println("[]");
+            return;
+        }
+
+        NodoGrafico raizGrafica = construirGrafo(raiz, 0);
+        int[] proximaX = new int[]{0};
+        asignarCoordenadasX(raizGrafica, proximaX);
+
+        int altoMax = obtenerAltoMax(raizGrafica);
+        int anchoMax = obtenerAnchoMax(raizGrafica) + 5;
+        char[][] lienzo = new char[altoMax * 3 + 1][anchoMax];
+
+        for (int i = 0; i < lienzo.length; i++) {
+            for (int j = 0; j < lienzo[i].length; j++) {
+                lienzo[i][j] = ' ';
+            }
+        }
+
+        dibujarLienzo(raizGrafica, lienzo);
+
+        System.out.println();
+        for (char[] fila : lienzo) {
+            String linea = new String(fila).stripTrailing();
+            if (!linea.isEmpty()) {
+                System.out.println(linea);
+            }
+        }
+        System.out.println();
+    }
+
+    private NodoGrafico construirGrafo(NodoArbolB nodo, int nivel) {
+        NodoGrafico ng = new NodoGrafico(nodo, nivel);
+        if (!nodo.esHoja && nodo.hijos != null) {
+            for (NodoArbolB hijo : nodo.hijos) {
+                if (hijo != null) {
+                    ng.hijos.add(construirGrafo(hijo, nivel + 1));
+                }
+            }
+        }
+        return ng;
+    }
+
+    private void asignarCoordenadasX(NodoGrafico ng, int[] proximaX) {
+        if (ng.hijos.isEmpty()) {
+            ng.x = proximaX[0];
+            proximaX[0] += ng.texto.length() + 3;
+        } else {
+            for (NodoGrafico hijo : ng.hijos) {
+                asignarCoordenadasX(hijo, proximaX);
+            }
+            int primerHijoX = ng.hijos.get(0).x;
+            int ultimoHijoX = ng.hijos.get(ng.hijos.size() - 1).x;
+            ng.x = (primerHijoX + ultimoHijoX) / 2;
+            
+            if (ng.x < proximaX[0]) {
+                int desfase = proximaX[0] - ng.x;
+                desplazarSubarbol(ng, desfase);
+                proximaX[0] = ng.x + ng.texto.length() + 3;
+            } else {
+                proximaX[0] = ng.x + ng.texto.length() + 3;
+            }
+        }
+    }
+
+    private void desplazarSubarbol(NodoGrafico ng, int desfase) {
+        ng.x += desfase;
+        for (NodoGrafico hijo : ng.hijos) {
+            desplazarSubarbol(hijo, desfase);
+        }
+    }
+
+    private int obtenerAltoMax(NodoGrafico ng) {
+        int max = ng.y;
+        for (NodoGrafico hijo : ng.hijos) {
+            max = Math.max(max, obtenerAltoMax(hijo));
+        }
+        return max;
+    }
+
+    private int obtenerAnchoMax(NodoGrafico ng) {
+        int max = ng.x + ng.texto.length();
+        for (NodoGrafico hijo : ng.hijos) {
+            max = Math.max(max, obtenerAnchoMax(hijo));
+        }
+        return max;
+    }
+
+    private void dibujarLienzo(NodoGrafico ng, char[][] lienzo) {
+        int filaNodo = ng.y * 3;
+        int colNodo = ng.x;
+
+        for (int i = 0; i < ng.texto.length(); i++) {
+            lienzo[filaNodo][colNodo + i] = ng.texto.charAt(i);
+        }
+
+        int centroPadre = ng.x + ng.texto.length() / 2;
+        int numHijos = ng.hijos.size();
+
+        for (int k = 0; k < numHijos; k++) {
+            NodoGrafico hijo = ng.hijos.get(k);
+            int centroHijo = hijo.x + hijo.texto.length() / 2;
+            int filaRama = filaNodo + 1;
+
+            char conector;
+            if (centroHijo < centroPadre) {
+                conector = '/';
+            } else if (centroHijo > centroPadre) {
+                conector = '\\';
+            } else {
+                conector = '|';
+            }
+
+            int colRama = (centroPadre + centroHijo) / 2;
+            lienzo[filaRama][colRama] = conector;
+
+            dibujarLienzo(hijo, lienzo);
         }
     }
 }
