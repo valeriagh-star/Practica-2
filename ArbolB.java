@@ -11,4 +11,30 @@ public class ArbolB {
     public NodoArbolB obtenerRaiz() {
         return raiz;
     }
+
+    // =========================================================================
+    // BÚSQUEDA
+    // =========================================================================
+    public boolean buscar(int llave) {
+        return buscarRecursivo(raiz, llave);
+    }
+
+    private boolean buscarRecursivo(NodoArbolB nodo, int llave) {
+        if (nodo == null) return false;
+
+        int i = 0;
+        while (i < nodo.llaves.size() && llave > nodo.llaves.get(i)) {
+            i++;
+        }
+
+        if (i < nodo.llaves.size() && llave == nodo.llaves.get(i)) {
+            return true;
+        }
+
+        if (nodo.esHoja) {
+            return false;
+        }
+
+        return buscarRecursivo(nodo.hijos.get(i), llave);
+    }
 }
