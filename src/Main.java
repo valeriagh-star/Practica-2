@@ -24,8 +24,9 @@ public class Main {
             System.out.println("4. Mostrar árbol actual");
             System.out.println("5. Imprimir árbol por niveles");
             System.out.println("6. Crear un nuevo árbol");
-            System.out.println("7. Salir");
-            System.out.print("Seleccione una opción (1-7): ");
+            System.out.println("7. Validar árbol (Reto Opcional)");
+            System.out.println("8. Salir");
+            System.out.print("Seleccione una opción (1-8): ");
 
             String entradaOpcion = escaner.nextLine().trim();
 
@@ -33,7 +34,7 @@ public class Main {
             try {
                 opcion = Integer.parseInt(entradaOpcion);
             } catch (NumberFormatException e) {
-                System.out.println("\n[ERROR]: Opción inválida. Por favor, ingrese un número entre 1 y 7.");
+                System.out.println("\n[ERROR]: Opción inválida. Por favor, ingrese un número entre 1 y 8.");
                 continue;
             }
 
@@ -67,13 +68,18 @@ public class Main {
                     solicitarInsercionInicial(escaner, arbol);
                     break;
                 case 7:
+                    System.out.println("\n---------------------------------------------");
+                    System.out.println(">>> VALIDACIÓN DE INVARIANTES (RETO OPCIONAL):");
+                    arbol.validarArbol();
+                    break;
+                case 8:
                     System.out.println("\nSaliendo del programa...");
                     escaner.close();
                     return;
                 default:
-                    System.out.println("\n[ERROR]: Opción fuera de rango. Seleccione un número entre 1 y 7.");
+                    System.out.println("\n[ERROR]: Opción fuera de rango. Seleccione un número entre 1 y 8.");
             }
-        }
+         }
     }
 
     private static void solicitarInsercionInicial(Scanner escaner, ArbolB arbol) {

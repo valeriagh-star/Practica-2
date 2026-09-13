@@ -481,4 +481,75 @@ public class ArbolB {
             dibujarLienzo(hijo, lienzo);
         }
     }
+    
+ // =========================================================================
+    // RETO OPCIONAL: VALIDACIÓN DE INVARIANTES DEL ÁRBOL B
+    // =========================================================================
+    public boolean validarArbol() {
+        if (raiz == null) {
+            System.out.println("-> Validación exitosa: El árbol está vacío.");
+            return true;
+        }
+
+        int[] nivelHojas = new int[]{-1}; // Guardará la profundidad de la primera hoja hallada
+        boolean esValido = validarNodoRecursivo(raiz, 0, nivelHojas, true);
+
+        if (esValido) {
+            System.out.println("-> ¡Validación exitosa! El árbol cumple con todas las invariantes de un Árbol B (m=4).");
+        } else {
+            System.out.println("-> Error de validación: El árbol viola las invariantes del Árbol B.");
+        }
+
+        return esValido;
+    }
+
+    private boolean validarNodoRecursivo(NodoArbolB nodo, int nivelActual, int[] nivelHojas, boolean esRaiz) {
+        if (nodo == null) return true;
+
+        // 1. Verificar máximo 3 llaves por nodo
+        if (nodo.llaves.size() > MAX_LLAVES) {
+            System.out.println(" Error: Nodo desbordado con " + nodo.llaves.size() + " llaves.");
+            return false;
+        }
+
+        // 2. Verificar mínimo 1 llave en nodos distintos de la raíz
+        if (!esRaiz && nodo.llaves.size() < MIN_LLAVES) {
+            System.out.println(" Error: Nodo subocupado con " + nodo.llaves.size() + " llaves en nivel " + nivelActual);
+            return false;
+        }
+
+        // 3. Verificar que las llaves estén estrictamente ordenadas
+        for (int i = 0; i < nodo.llaves.size() - 1; i++) {
+            if (nodo.llaves.get(i) >= nodo.llaves.get(i + 1)) {
+                System.out.println(" Error: Llaves desordenadas o duplicadas en nodo: " + nodo.llaves);
+                return false;
+            }
+        }
+
+        // 4. Verificar invariantes para hojas y nodos internos
+        if (nodo.esHoja) {
+            // Verificar que todas las hojas permanezcan en el mismo nivel
+            if (nivelHojas[0] == -1) {
+                nivelHojas[0] = nivelActual;
+            } else if (nivelHojas[0] != nivelActual) {
+                System.out.println(" Error: Hoja desbalanceada en nivel " + nivelActual + ". Se esperaba nivel " + nivelHojas[0]);
+                return false;
+            }
+        } else {
+            // 5. Verificar cantidad correcta de hijos en nodos internos (num_hijos = num_llaves + 1)
+            if (nodo.hijos == null || nodo.hijos.size() != nodo.llaves.size() + 1) {
+                System.out.println(" Error: Nodo interno posee una cantidad incorrecta de hijos.");
+                return false;
+            }
+
+            // Validar recursivamente cada uno de los hijos
+            for (NodoArbolB hijo : nodo.hijos) {
+                if (!validarNodoRecursivo(hijo, nivelActual + 1, nivelHojas, false)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
 }
