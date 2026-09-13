@@ -29,13 +29,15 @@ Utilizamos Java.
 
    `cd Practica-2`
 
-* Compilar todos los archivos `.java` ubicados dentro de la carpeta `src`:
+* Moverse a la carpeta `src` y compilar todos los `.java`:
 
-   `javac src/ArbolB/*.java`
+   `cd src`
 
-* Ejecutar la clase principal especificando el classpath:
+   `javac *.java`
 
-   `java -cp src ArbolB.Main`
+* Ejecutar la clase `Main.java`:
+
+   `java Main.java`
 
 ---
 

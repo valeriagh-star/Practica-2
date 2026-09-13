@@ -487,7 +487,7 @@ public class ArbolB {
     // =========================================================================
     public boolean validarArbol() {
         if (raiz == null) {
-            System.out.println("-> Validación exitosa: El árbol está vacío.");
+            System.out.println("Validación exitosa: El árbol está vacío.");
             return true;
         }
 
@@ -495,9 +495,9 @@ public class ArbolB {
         boolean esValido = validarNodoRecursivo(raiz, 0, nivelHojas, true);
 
         if (esValido) {
-            System.out.println("-> ¡Validación exitosa! El árbol cumple con todas las invariantes de un Árbol B (m=4).");
+            System.out.println(" ¡Validación exitosa! El árbol cumple con todas las invariantes de un Árbol B (m=4).");
         } else {
-            System.out.println("-> Error de validación: El árbol viola las invariantes del Árbol B.");
+            System.out.println(" [ERROR DE VALIDACIÓN] El árbol viola las invariantes del Árbol B.");
         }
 
         return esValido;
@@ -508,20 +508,20 @@ public class ArbolB {
 
         // 1. Verificar máximo 3 llaves por nodo
         if (nodo.llaves.size() > MAX_LLAVES) {
-            System.out.println(" Error: Nodo desbordado con " + nodo.llaves.size() + " llaves.");
+            System.out.println(" [ERROR] Nodo desbordado con " + nodo.llaves.size() + " llaves.");
             return false;
         }
 
         // 2. Verificar mínimo 1 llave en nodos distintos de la raíz
         if (!esRaiz && nodo.llaves.size() < MIN_LLAVES) {
-            System.out.println(" Error: Nodo subocupado con " + nodo.llaves.size() + " llaves en nivel " + nivelActual);
+            System.out.println(" [ERROR] Nodo subocupado con " + nodo.llaves.size() + " llaves en nivel " + nivelActual);
             return false;
         }
 
         // 3. Verificar que las llaves estén estrictamente ordenadas
         for (int i = 0; i < nodo.llaves.size() - 1; i++) {
             if (nodo.llaves.get(i) >= nodo.llaves.get(i + 1)) {
-                System.out.println(" Error: Llaves desordenadas o duplicadas en nodo: " + nodo.llaves);
+                System.out.println(" [ERROR] Llaves desordenadas o duplicadas en nodo: " + nodo.llaves);
                 return false;
             }
         }
@@ -532,13 +532,13 @@ public class ArbolB {
             if (nivelHojas[0] == -1) {
                 nivelHojas[0] = nivelActual;
             } else if (nivelHojas[0] != nivelActual) {
-                System.out.println(" Error: Hoja desbalanceada en nivel " + nivelActual + ". Se esperaba nivel " + nivelHojas[0]);
+                System.out.println(" [ERROR] Hoja desbalanceada en nivel " + nivelActual + ". Se esperaba nivel " + nivelHojas[0]);
                 return false;
             }
         } else {
             // 5. Verificar cantidad correcta de hijos en nodos internos (num_hijos = num_llaves + 1)
             if (nodo.hijos == null || nodo.hijos.size() != nodo.llaves.size() + 1) {
-                System.out.println(" Error: Nodo interno posee una cantidad incorrecta de hijos.");
+                System.out.println(" [ERROR] Nodo interno posee una cantidad incorrecta de hijos.");
                 return false;
             }
 
