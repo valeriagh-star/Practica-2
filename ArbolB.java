@@ -128,4 +128,165 @@ public class ArbolB {
 
         return new ResultadoDivision(llavePromovida, izquierdo, derecho);
     }
+
+    // =========================================================================
+    // ELIMINACIÓN
+    // =========================================================================
+    public boolean eliminar(int llave) {
+        if (!buscar(llave)) {
+            System.out.println("-> La llave " + llave + " no existe en el árbol.");
+            return false;
+        }
+
+        eliminarRecursivo(raiz, llave);
+
+        if (raiz != null && raiz.llaves.isEmpty()) {
+            if (raiz.esHoja) {
+                raiz = null;
+            } else {
+                System.out.println("\n [REDUCCIÓN DE ALTURA]");
+                System.out.println("   La raíz quedó vacía con un solo hijo. El hijo se convierte en la nueva raíz.");
+                raiz = raiz.hijos.get(0);
+            }
+        }
+        return true;
+    }
+
+    private void eliminarRecursivo(NodoArbolB nodo, int llave) {
+        int indice = 0;
+        while (indice < nodo.llaves.size() && llave > nodo.llaves.get(indice)) {
+            indice++;
+        }
+
+        if (indice < nodo.llaves.size() && nodo.llaves.get(indice) == llave) {
+            if (nodo.esHoja) {
+                nodo.llaves.remove(indice);
+            } else {
+                NodoArbolB hijoIzquierdo = nodo.hijos.get(indice);
+                NodoArbolB hijoDerecho = nodo.hijos.get(indice + 1);
+
+                if (hijoIzquierdo.llaves.size() > MIN_LLAVES) {
+                    int predecesor = obtenerPredecesor(hijoIzquierdo);
+                    System.out.println("\n [FASE DE REEMPLAZO POR PREDECESOR]");
+                    System.out.println("   Reemplazando la llave interna " + llave + " con el predecesor " + predecesor);
+                    nodo.llaves.set(indice, predecesor);
+                    eliminarRecursivo(hijoIzquierdo, predecesor);
+                } else if (hijoDerecho.llaves.size() > MIN_LLAVES) {
+                    int sucesor = obtenerSucesor(hijoDerecho);
+                    System.out.println("\n [FASE DE REEMPLAZO POR SUCESOR]");
+                    System.out.println("   Reemplazando la llave interna " + llave + " con el sucesor " + sucesor);
+                    nodo.llaves.set(indice, sucesor);
+                    eliminarRecursivo(hijoDerecho, sucesor);
+                } else {
+                    System.out.println("\n [FASE DE FUSIÓN POR ELIMINACIÓN INTERNA]");
+                    System.out.println("   Ambos hijos tienen 1 llave. Fusionando para bajar la llave " + llave);
+                    fusionar(nodo, indice);
+                    eliminarRecursivo(hijoIzquierdo, llave);
+                }
+            }
+        } else {
+            if (nodo.esHoja) {
+                return;
+            }
+
+            boolean esUltimoHijo = (indice == nodo.llaves.size());
+            NodoArbolB hijo = nodo.hijos.get(indice);
+
+            if (hijo.llaves.size() == MIN_LLAVES) {
+                repararSubocupacion(nodo, indice);
+            }
+
+            if (esUltimoHijo && indice > nodo.llaves.size()) {
+                eliminarRecursivo(nodo.hijos.get(indice - 1), llave);
+            } else {
+                eliminarRecursivo(nodo.hijos.get(indice), llave);
+            }
+        }
+    }
+
+    private int obtenerPredecesor(NodoArbolB nodo) {
+        NodoArbolB actual = nodo;
+        while (!actual.esHoja) {
+            actual = actual.hijos.get(actual.hijos.size() - 1);
+        }
+        return actual.llaves.get(actual.llaves.size() - 1);
+    }
+
+    private int obtenerSucesor(NodoArbolB nodo) {
+        NodoArbolB actual = nodo;
+        while (!actual.esHoja) {
+            actual = actual.hijos.get(0);
+        }
+        return actual.llaves.get(0);
+    }
+
+    private void repararSubocupacion(NodoArbolB padre, int indiceHijo) {
+        if (indiceHijo > 0 && padre.hijos.get(indiceHijo - 1).llaves.size() > MIN_LLAVES) {
+            pedirPrestadoIzquierdo(padre, indiceHijo);
+        } else if (indiceHijo < padre.hijos.size() - 1 && padre.hijos.get(indiceHijo + 1).llaves.size() > MIN_LLAVES) {
+            pedirPrestadoDerecho(padre, indiceHijo);
+        } else {
+            if (indiceHijo > 0) {
+                fusionar(padre, indiceHijo - 1);
+            } else {
+                fusionar(padre, indiceHijo);
+            }
+        }
+    }
+
+    private void pedirPrestadoIzquierdo(NodoArbolB padre, int indiceHijo) {
+        NodoArbolB hijo = padre.hijos.get(indiceHijo);
+        NodoArbolB hermanoIzquierdo = padre.hijos.get(indiceHijo - 1);
+
+        System.out.println("\n [FASE DE REDISTRIBUCIÓN (PEDIR A HERMANO IZQUIERDO)]");
+        System.out.println("   Hermano izquierdo presta una llave a través del padre.");
+
+        hijo.llaves.add(0, padre.llaves.get(indiceHijo - 1));
+        padre.llaves.set(indiceHijo - 1, hermanoIzquierdo.llaves.remove(hermanoIzquierdo.llaves.size() - 1));
+
+        if (!hijo.esHoja) {
+            hijo.hijos.add(0, hermanoIzquierdo.hijos.remove(hermanoIzquierdo.hijos.size() - 1));
+        }
+
+        System.out.println("   Estado del árbol tras redistribución:");
+        imprimirArbol();
+    }
+
+    private void pedirPrestadoDerecho(NodoArbolB padre, int indiceHijo) {
+        NodoArbolB hijo = padre.hijos.get(indiceHijo);
+        NodoArbolB hermanoDerecho = padre.hijos.get(indiceHijo + 1);
+
+        System.out.println("\n [FASE DE REDISTRIBUCIÓN (PEDIR A HERMANO DERECHO)]");
+        System.out.println("   Hermano derecho presta una llave a través del padre.");
+
+        hijo.llaves.add(padre.llaves.get(indiceHijo));
+        padre.llaves.set(indiceHijo, hermanoDerecho.llaves.remove(0));
+
+        if (!hijo.esHoja) {
+            hijo.hijos.add(hermanoDerecho.hijos.remove(0));
+        }
+
+        System.out.println("   Estado del árbol tras redistribución:");
+        imprimirArbol();
+    }
+
+    private void fusionar(NodoArbolB padre, int indice) {
+        NodoArbolB hijoIzquierdo = padre.hijos.get(indice);
+        NodoArbolB hijoDerecho = padre.hijos.get(indice + 1);
+
+        System.out.println("\n [FASE DE FUSIÓN DE NODOS]");
+        System.out.println("   Fusionando nodo con su hermano y la llave separadora del padre: " + padre.llaves.get(indice));
+
+        hijoIzquierdo.llaves.add(padre.llaves.remove(indice));
+        hijoIzquierdo.llaves.addAll(hijoDerecho.llaves);
+
+        if (!hijoIzquierdo.esHoja) {
+            hijoIzquierdo.hijos.addAll(hijoDerecho.hijos);
+        }
+
+        padre.hijos.remove(indice + 1);
+
+        System.out.println("   Estado del árbol tras fusión:");
+        imprimirArbol();
+    }
 }
